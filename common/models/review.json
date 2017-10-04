@@ -1,0 +1,35 @@
+{
+  "name": "Review",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "comment": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "client": {
+      "type": "belongsTo",
+      "model": "Client",
+      "foreignKey": ""
+    },
+    "agent": {
+      "type": "belongsTo",
+      "model": "Agent",
+      "foreignKey": ""
+    },
+    "reviewRatingTypes": {
+      "type": "hasMany",
+      "model": "ReviewRatingType",
+      "foreignKey": "",
+      "through": "ReviewRating"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

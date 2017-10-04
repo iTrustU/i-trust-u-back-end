@@ -1,0 +1,29 @@
+{
+  "name": "ReviewRating",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "value": {
+      "type": "number",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "review": {
+      "type": "belongsTo",
+      "model": "Review",
+      "foreignKey": ""
+    },
+    "reviewRatingType": {
+      "type": "belongsTo",
+      "model": "ReviewRatingType",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

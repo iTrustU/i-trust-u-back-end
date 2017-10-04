@@ -1,0 +1,81 @@
+{
+  "_meta": {
+    "sources": [
+      "loopback/common/models",
+      "loopback/server/models",
+      "../common/models",
+      "./models"
+    ],
+    "mixins": [
+      "loopback/common/mixins",
+      "loopback/server/mixins",
+      "../node_modules/loopback-ds-timestamp-mixin",
+      "../common/mixins",
+      "./mixins"
+    ]
+  },
+  "AccessToken": {
+    "dataSource": "iTrustUDB",
+    "public": false,
+    "relations": {
+      "user": {
+        "type": "belongsTo",
+        "model": "user",
+        "foreignKey": "userId"
+      }
+    }
+  },
+  "ACL": {
+    "dataSource": "iTrustUDB",
+    "public": true
+  },
+  "RoleMapping": {
+    "dataSource": "iTrustUDB",
+    "public": true,
+    "options": {
+      "strictObjectIDCoercion": true
+    }
+  },
+  "Role": {
+    "dataSource": "iTrustUDB",
+    "public": true
+  },
+  "user": {
+    "dataSource": "iTrustUDB",
+    "public": true,
+    "relations": {
+      "accessTokens": {
+        "type": "hasMany",
+        "model": "AccessToken",
+        "foreignKey": "userId",
+        "options": {
+          "disableInclude": true
+        }
+      }
+    }
+  },
+  "Agent": {
+    "dataSource": "iTrustUDB",
+    "public": true
+  },
+  "Client": {
+    "dataSource": "iTrustUDB",
+    "public": true
+  },
+  "Review": {
+    "dataSource": "iTrustUDB",
+    "public": true
+  },
+  "ReviewRating": {
+    "dataSource": "iTrustUDB",
+    "public": true
+  },
+  "ReviewRatingType": {
+    "dataSource": "iTrustUDB",
+    "public": true
+  },
+  "InsuranceCompany": {
+    "dataSource": "iTrustUDB",
+    "public": true
+  }
+}

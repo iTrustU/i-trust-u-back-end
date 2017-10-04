@@ -1,0 +1,23 @@
+{
+  "name": "user",
+  "plural": "users",
+  "base": "User",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "agent": {
+      "type": "hasOne",
+      "model": "Agent",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
