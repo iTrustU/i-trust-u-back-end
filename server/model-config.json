@@ -15,7 +15,7 @@
     ]
   },
   "AccessToken": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": false,
     "relations": {
       "user": {
@@ -26,22 +26,22 @@
     }
   },
   "ACL": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": true
   },
   "RoleMapping": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": true,
     "options": {
       "strictObjectIDCoercion": true
     }
   },
   "Role": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": true
   },
   "user": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": true,
     "relations": {
       "accessTokens": {
@@ -55,27 +55,27 @@
     }
   },
   "Agent": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": true
   },
   "Client": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": true
   },
   "Review": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": true
   },
   "ReviewRating": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": true
   },
   "ReviewRatingType": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": true
   },
   "InsuranceCompany": {
-    "dataSource": "iTrustUDB",
+    "dataSource": "mongoDB",
     "public": true
   }
 }

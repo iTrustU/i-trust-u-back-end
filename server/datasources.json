@@ -3,7 +3,7 @@
     "name": "db",
     "connector": "memory"
   },
-  "iTrustUDB": {
+  "mongoDB": {
     "host": "localhost",
     "port": 27017,
     "url": "",
