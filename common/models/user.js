@@ -34,45 +34,45 @@ module.exports = function(User) {
   User.remoteMethod('getAllUserBasedOnRole', {
     http: {
       path: '/all-user-based-on-role',
-      verb: 'get'
+      verb: 'get',
     },
     accepts: {
       arg: 'roleName',
-      type: 'string'
+      type: 'string',
     },
     returns: {
       arg: 'users',
-      type: 'array'
+      type: 'array',
     },
-    description: 'Get all users based on role'
+    description: 'Get all users based on role',
   })
 
   User.isAlreadyRegistered = function(email, cb) {
     User.findOne({
       where: {
-        email: email
+        email: email,
       },
-      include: "profile"
+      include: "profile",
     }, function(err, user) {
-      if (err) cb(err)
-      cb(null, user)
+      if (err) cb(err);
+      cb(null, user);
     })
   }
 
   User.remoteMethod('isAlreadyRegistered', {
     http: {
       path: '/isAlreadyRegistered',
-      verb: 'get'
+      verb: 'get',
     },
     accepts: {
       arg: 'email',
-      type: 'string'
+      type: 'string',
     },
     returns: {
       arg: 'userDetail',
-      type: 'object'
+      type: 'object',
     },
-    description: "Check that user already registered by email ?"
+    description: "Check that user already registered by email ?",
   })
 
   User.customLogin = function (email, password, cb) {
