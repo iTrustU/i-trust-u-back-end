@@ -15,4 +15,15 @@ module.exports = function(Agent) {
     }
     next();
   });
+
+  Agent.observe('after delete', function(ctx, next){
+    console.log(`deleted`, ctx.where)
+    let objectID = ctx.where.id.toString()
+    index.deleteObject(objectID, (err) => {
+      if (!err) {
+        console.log('success delete an object on Algolia');
+      }
+    });
+    next();
+  });
 };
