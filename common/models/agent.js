@@ -8,8 +8,7 @@ let index = client.initIndex('iTrustU-demo');
 module.exports = function(Agent) {
   Agent.observe('after save', function logQuery(ctx, next) {
     if (ctx.instance) {
-      console.log('ctx.instance : ', ctx.instance);
-
+      ctx.instance.objectID = ctx.instance.id;
       index.addObject(ctx.instance, (err, content) => {
         console.log('the content was submitted : ', content);
       });
