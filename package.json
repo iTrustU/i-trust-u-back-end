@@ -11,6 +11,7 @@
     "posttest": "npm run lint && nsp check"
   },
   "dependencies": {
+    "airtable": "^0.5.2",
     "algoliasearch": "^3.24.8",
     "bluebird": "^3.5.0",
     "compression": "^1.0.3",
