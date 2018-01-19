@@ -9,7 +9,7 @@
     "url": "",
     "database": "i-trust-u",
     "password": "",
-    "name": "iTrustUDB",
+    "name": "mongoDB",
     "user": "",
     "connector": "mongodb"
   }

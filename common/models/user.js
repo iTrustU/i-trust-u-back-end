@@ -3,8 +3,8 @@
 module.exports = function(User) {
   var Airtable = require('airtable');
   var base = new Airtable({
-    apiKey: 'keyfTN0omlKzmFB22',
-  }).base('appTA6iu91FlUXRee');
+    apiKey: process.env.AIRTABLE_API_KEY,
+  }).base(process.env.AIRTABLE_BASE);
 
   // Remove existing validations for email
   delete User.validations.email;
