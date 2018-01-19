@@ -16,8 +16,27 @@
       "type": "hasOne",
       "model": "Agent",
       "foreignKey": ""
+    },
+    "profile": {
+      "type": "hasOne",
+      "model": "Profile",
+      "foreignKey": ""
+    },
+    "roles": {
+      "type": "hasMany",
+      "model": "Role",
+      "foreignKey": "principalId",
+      "through": "RoleMapping"
     }
   },
-  "acls": [],
+  "acls": [
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "register"
+    }
+  ],
   "methods": {}
 }
