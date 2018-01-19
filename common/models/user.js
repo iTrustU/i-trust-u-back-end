@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = function(User) {
+  var Airtable = require('airtable');
+  var base = new Airtable({
+    apiKey: 'keyfTN0omlKzmFB22',
+  }).base('appTA6iu91FlUXRee');
 
   // Remove existing validations for email
   delete User.validations.email;
@@ -126,61 +130,87 @@ module.exports = function(User) {
     description: "Custom response after login - include profile"
   })
 
-  User.register = function(email, password, cb) {
-    User.create({
-      email: email,
-      password: password
-    }).then((user) => {
-      console.log('sukses buat akun : ', user);
+  User.register = function(email, password, insuranceAgentId, cb) {
+    let response = {
+      success: false,
+      message: 'something when wrong',
+    };
+    // check is there's at Insurace company database
+    base('Agents').select({
+      filterByFormula: '{InsuranceAgentId} = ' + insuranceAgentId,
+    }).eachPage(function page(records, fetchNextPage) {
+      if (records.length === 0) {
+        response.message = `Agent ID : ${insuranceAgentId} tidak ditemukan`;
+        return cb(null, {}, null)
+      }
 
-      let app = User.app;
-      let Role = app.models.Role
-      let RoleMapping = app.models.RoleMapping
+      User.create({
+        email: email,
+        password: password
+      }).then((user) => {
+        console.log('sukses buat akun : ', user);
 
-      Role.findOne({
-        where: {
-          name: 'people'
-        }
-      }).then((role) => {
-        RoleMapping.create({
-          principalType: "USER",
-          principalId: user.id,
-          roleId: role.id
-        }).then(roleMapped => {
-          console.log('sukses mapping user to people');
-          User.login({
-            email: email,
-            password: password
-          }, 'user', (err, res) => {
-            if (err) {
-              console.log('Err : ', err);
-              return cb(err)
-            }
+        let app = User.app;
+        let Role = app.models.Role
+        let RoleMapping = app.models.RoleMapping
 
-            User.findById(res.userId, {
-              include: ['profile', 'roles']
-            }).then((userDetail) => {
-              // add profile property even it empty
+        Role.findOne({
+          where: {
+            name: 'agent',
+          }
+        }).then((role) => {
+          if (!role) {
+            response.message = 'role tidak ditemukan';
+            return cb(null, response, {});
+          }
 
-              let userDetailObj = JSON.parse(JSON.stringify(userDetail))
-              userDetailObj.profile = {}
-              console.log('obj userDetail : ', userDetail);
-              cb(null, userDetailObj, res.id)
+          RoleMapping.create({
+            principalType: "USER",
+            principalId: user.id,
+            roleId: role.id
+          }).then(roleMapped => {
+            console.log('sukses mapping user to people');
+            User.login({
+              email: email,
+              password: password,
+            }, 'user', (err, res) => {
+              if (err) {
+                console.log('Err : ', err);
+                return cb(err)
+              }
+
+              User.findById(res.userId, {
+                include: ['profile', 'roles']
+              }).then((userDetail) => {
+                // add profile property even it empty
+
+                let userDetailObj = JSON.parse(JSON.stringify(userDetail))
+                userDetailObj.profile = {}
+                userDetailObj.fromInsuranceCompany = records[0].fields;
+                cb(null, userDetailObj, res.id)
+              })
             })
+          }).catch(err => {
+            console.log('error when trying to mapping the role :::::', err);
+            cb(err)
           })
         }).catch(err => {
-          console.log('error when trying to mapping the role :::::', err);
+          console.log('err when find user : ', err);
           cb(err)
         })
+
       }).catch(err => {
-        console.log('err when find user : ', err);
+        console.log('error buat akun : ', err);
         cb(err)
       })
 
-    }).catch(err => {
-      console.log('error buat akun : ', err);
-      cb(err)
+    }, function done(err) {
+      if (err) {
+        console.error(err);
+        return;
+      }
     })
+
   }
 
   User.remoteMethod('register', {
@@ -196,6 +226,10 @@ module.exports = function(User) {
       {
         arg: 'password',
         type: 'string'
+      },
+      {
+        arg: 'insuranceAgentId',
+        type: 'string',
       }
     ],
     returns: [
