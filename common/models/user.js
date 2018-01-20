@@ -21,6 +21,7 @@ module.exports = function(User) {
     let app = User.app;
     let Role = app.models.Role
     let RoleMapping = app.models.RoleMapping
+    let Profile = app.models.Profile;
 
     Role.findOne({
       where: {
@@ -143,16 +144,18 @@ module.exports = function(User) {
         response.message = `Agent ID : ${insuranceAgentId} tidak ditemukan`;
         return cb(null, {}, null)
       }
+      let fromInsuranceCompany = records[0].fields;
 
       User.create({
         email: email,
-        password: password
+        password: password,
       }).then((user) => {
         console.log('sukses buat akun : ', user);
 
         let app = User.app;
-        let Role = app.models.Role
-        let RoleMapping = app.models.RoleMapping
+        let Role = app.models.Role;
+        let RoleMapping = app.models.RoleMapping;
+        let Profile = app.models.Profile;
 
         Role.findOne({
           where: {
@@ -176,19 +179,31 @@ module.exports = function(User) {
             }, 'user', (err, res) => {
               if (err) {
                 console.log('Err : ', err);
-                return cb(err)
+                response.message = 'error when trying to login the user';
+                return cb(null, response, {});
               }
 
-              User.findById(res.userId, {
-                include: ['profile', 'roles']
-              }).then((userDetail) => {
-                // add profile property even it empty
+              console.log('profile picture', fromInsuranceCompany.ProfilePicture[0].url)
+              // save profile
+              Profile.create({
+                name: fromInsuranceCompany.Name,
+                city: fromInsuranceCompany.City,
+                profilePicture: fromInsuranceCompany.ProfilePicture[0].url,
+                userId: res.userId,
+              }).then((profileCreated) => {
+                User.findById(res.userId, {
+                  include: ['profile', 'roles']
+                }).then((userDetail) => {
+                  // add profile property even it empty
 
-                let userDetailObj = JSON.parse(JSON.stringify(userDetail))
-                userDetailObj.profile = {}
-                userDetailObj.fromInsuranceCompany = records[0].fields;
-                cb(null, userDetailObj, res.id)
-              })
+                  let userDetailObj = JSON.parse(JSON.stringify(userDetail))
+                  userDetailObj.fromInsuranceCompany = fromInsuranceCompany;
+                  cb(null, userDetailObj, res.id);
+                });
+              }).catch(err => {
+                response.message = 'create profile failed : ' + err;
+                cb(null, response, {});
+              });
             })
           }).catch(err => {
             console.log('error when trying to mapping the role :::::', err);
