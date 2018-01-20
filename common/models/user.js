@@ -1,4 +1,6 @@
 'use strict';
+let firebaseAdmin = require('../../server/firebase-admin.js');
+console.log('the firebase admin : ', firebaseAdmin);
 
 module.exports = function(User) {
   var Airtable = require('airtable');
@@ -196,6 +198,7 @@ module.exports = function(User) {
                 }).then((userDetail) => {
                   // add profile property even it empty
 
+                  // base('Insurances').find(fromInsuranceCompany.)
                   let userDetailObj = JSON.parse(JSON.stringify(userDetail))
                   userDetailObj.fromInsuranceCompany = fromInsuranceCompany;
                   cb(null, userDetailObj, res.id);
