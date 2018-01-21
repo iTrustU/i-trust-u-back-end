@@ -128,7 +128,7 @@ module.exports = function(User) {
       {
         arg: 'token',
         type: 'string'
-      }
+      },
     ],
     description: "Custom response after login - include profile"
   })
@@ -142,9 +142,13 @@ module.exports = function(User) {
     base('Agents').select({
       filterByFormula: '{InsuranceAgentId} = ' + insuranceAgentId,
     }).eachPage(function page(records, fetchNextPage) {
-      if (records.length === 0) {
+      console.log('the record : ', records);
+      let recordsFromAirtable = JSON.parse(JSON.stringify(records))
+
+      if (recordsFromAirtable.length == 0) {
         response.message = `Agent ID : ${insuranceAgentId} tidak ditemukan`;
-        return cb(null, {}, null)
+
+        return cb(null, {}, null, response.success, response.message);
       }
       let fromInsuranceCompany = records[0].fields;
 
@@ -166,7 +170,7 @@ module.exports = function(User) {
         }).then((role) => {
           if (!role) {
             response.message = 'role tidak ditemukan';
-            return cb(null, response, {});
+            return cb(null, {}, null, response.success, response.message);
           }
 
           RoleMapping.create({
@@ -182,7 +186,7 @@ module.exports = function(User) {
               if (err) {
                 console.log('Err : ', err);
                 response.message = 'error when trying to login the user';
-                return cb(null, response, {});
+                return cb(null, response, {}, response.success, response.message);
               }
 
               console.log('profile picture', fromInsuranceCompany.ProfilePicture[0].url)
@@ -201,25 +205,25 @@ module.exports = function(User) {
                   // base('Insurances').find(fromInsuranceCompany.)
                   let userDetailObj = JSON.parse(JSON.stringify(userDetail))
                   userDetailObj.fromInsuranceCompany = fromInsuranceCompany;
-                  cb(null, userDetailObj, res.id);
+                  return cb(null, userDetailObj, res.id, response.success, response.message);
                 });
               }).catch(err => {
                 response.message = 'create profile failed : ' + err;
-                cb(null, response, {});
+                return cb(null, response, {}, response.success, response.message);
               });
             })
           }).catch(err => {
             console.log('error when trying to mapping the role :::::', err);
-            cb(err)
+            return cb(null, response, {}, response.success, response.message);
           })
         }).catch(err => {
           console.log('err when find user : ', err);
-          cb(err)
+          return cb(null, response, {}, response.success, response.message);
         })
 
       }).catch(err => {
         console.log('error buat akun : ', err);
-        cb(err)
+        return cb(null, response, {}, response.success, response.message);
       })
 
     }, function done(err) {
@@ -258,7 +262,15 @@ module.exports = function(User) {
       {
         arg: "token",
         type: 'string'
-      }
+      },
+      {
+        arg: 'success',
+        type: 'boolean'
+      },
+      {
+        arg: 'message',
+        type: 'string'
+      },
     ],
     description: "custom register for mobile app"
   })
