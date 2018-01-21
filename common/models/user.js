@@ -276,4 +276,63 @@ module.exports = function(User) {
     returns: {arg: 'greeting', type: 'string'},
     description: "Just trying to create remoteMethod"
   })
+
+  User.updateDeviceToken = function(email, deviceToken, cb) {
+    let app = User.app;
+    let Profile = app.models.Profile;
+
+    let response = {
+      message: 'something when wrong',
+      status: false,
+    }
+    User.findOne({
+      where: {
+        email: email,
+      },
+      include: 'profile',
+    }).then(user => {
+      if (!user) {
+        response.message = 'user with email : ' + email;
+        return cb(null, response.message, response.status);
+      }
+
+      let convertedUser = JSON.parse(JSON.stringify(user))
+
+      console.log('the user : ', convertedUser, convertedUser.profile.id);
+      let profile = new Profile();
+      profile.setId(convertedUser.profile.id);
+      console.log('the new profile instance : ', profile);
+      profile.updateAttributes({deviceToken: deviceToken}, (err, newProfile) => {
+        if (err) {
+          response.message = 'err when update token, profile id : ' + convertedUser.profile.id + ' err : ' + err;
+          return cb(null, response.message, response.status);
+        }
+
+        console.log('new profile ', newProfile);
+        response.message = 'device token changed into ' + deviceToken;
+        response.status = true;
+        return cb(null, response.message, response.status);
+      });
+    }).catch(err => {
+      response.message = 'error when trying to find a user : ' + err;
+      console.log('err when trying to find a user : ', err);
+      return cb(null, response.message, response.status);
+    });
+  }
+
+  User.remoteMethod('updateDeviceToken', {
+    http: {
+      path: '/update-device-token',
+      verb: 'post',
+    },
+    accepts: [
+      { arg: 'email', type: 'string' },
+      { arg: 'deviceToken', type: 'string'},
+    ],
+    returns: [
+      { arg: 'message', type: 'string' },
+      { arg: 'status', type: 'string' },
+    ],
+    description: "Update device token for Push Notification",
+  });
 };

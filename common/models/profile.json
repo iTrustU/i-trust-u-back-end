@@ -17,6 +17,10 @@
     "city": {
       "type": "string",
       "required": true
+    },
+    "deviceToken": {
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],
