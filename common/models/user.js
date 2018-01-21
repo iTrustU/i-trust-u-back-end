@@ -83,13 +83,19 @@ module.exports = function(User) {
   })
 
   User.customLogin = function (email, password, cb) {
+    let response = {
+      success: false,
+      message: '',
+    };
+
     User.login({
       email: email,
-      password: password
+      password: password,
     }, 'user', (err, res) => {
       if (err) {
+        response.message = 'email atau password salah : ' + err;
         console.log('Err : ', err);
-        return cb(err)
+        return cb(null, {}, null, response.success, response.message);
       }
 
       User.findById(res.userId, {
@@ -100,7 +106,9 @@ module.exports = function(User) {
         if (!userDetailObj.profile) {
           userDetailObj.profile = {}
         }
-        cb(null, userDetailObj, res.id)
+        response.message = 'sukses masuk kedalam sistem';
+        response.success = true;
+        cb(null, userDetailObj, res.id, response.success, response.message);
       })
     })
   }
@@ -128,6 +136,14 @@ module.exports = function(User) {
       {
         arg: 'token',
         type: 'string'
+      },
+      {
+        arg: 'success',
+        type: 'boolean',
+      },
+      {
+        arg: 'message',
+        type: 'string',
       },
     ],
     description: "Custom response after login - include profile"
@@ -205,6 +221,8 @@ module.exports = function(User) {
                   // base('Insurances').find(fromInsuranceCompany.)
                   let userDetailObj = JSON.parse(JSON.stringify(userDetail))
                   userDetailObj.fromInsuranceCompany = fromInsuranceCompany;
+                  response.success = true;
+                  response.message = 'sukses mendaftar';
                   return cb(null, userDetailObj, res.id, response.success, response.message);
                 });
               }).catch(err => {
@@ -295,7 +313,7 @@ module.exports = function(User) {
 
     let response = {
       message: 'something when wrong',
-      status: false,
+      success: false,
     }
     User.findOne({
       where: {
@@ -305,7 +323,7 @@ module.exports = function(User) {
     }).then(user => {
       if (!user) {
         response.message = 'user with email : ' + email;
-        return cb(null, response.message, response.status);
+        return cb(null, response.message, response.success);
       }
 
       let convertedUser = JSON.parse(JSON.stringify(user))
@@ -317,18 +335,18 @@ module.exports = function(User) {
       profile.updateAttributes({deviceToken: deviceToken}, (err, newProfile) => {
         if (err) {
           response.message = 'err when update token, profile id : ' + convertedUser.profile.id + ' err : ' + err;
-          return cb(null, response.message, response.status);
+          return cb(null, response.message, response.success);
         }
 
         console.log('new profile ', newProfile);
         response.message = 'device token changed into ' + deviceToken;
-        response.status = true;
-        return cb(null, response.message, response.status);
+        response.success = true;
+        return cb(null, response.message, response.success);
       });
     }).catch(err => {
       response.message = 'error when trying to find a user : ' + err;
       console.log('err when trying to find a user : ', err);
-      return cb(null, response.message, response.status);
+      return cb(null, response.message, response.success);
     });
   }
 
@@ -343,7 +361,7 @@ module.exports = function(User) {
     ],
     returns: [
       { arg: 'message', type: 'string' },
-      { arg: 'status', type: 'string' },
+      { arg: 'success', type: 'boolean' },
     ],
     description: "Update device token for Push Notification",
   });
