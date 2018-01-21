@@ -365,4 +365,81 @@ module.exports = function(User) {
     ],
     description: "Update device token for Push Notification",
   });
+
+  User.tryNotify = (userId, cb) => {
+    let response = {
+      success: false,
+      message: 'somehting when wrong',
+    };
+
+    User.findById(userId, {
+      include: ['profile'],
+    }).then(userDetail => {
+      if (!userDetail) {
+        response.message = `user with ID ${userId} is not found `;
+        return cb(null, response.message, response.success);
+      }
+
+      let convertedUser = JSON.parse(JSON.stringify(userDetail));
+      var payload = {
+        notification: {
+          title: `Testing - ${convertedUser.profile.deviceToken}`,
+          body: `User ID ${userId} - Device Token ${convertedUser.profile.deviceToken}`,
+        },
+        data: {
+          reportId: convertedUser.profile.deviceToken,
+        },
+      };
+
+      var options = {
+        priority: 'high',
+        timeToLive: 60 * 60 * 24,
+      };
+        // Send a message to the device corresponding to the provided
+      // registration token with the provided options.
+      firebaseAdmin.messaging().sendToDevice([convertedUser.profile.deviceToken], payload, options)
+        .then(function(response) {
+          if (response.failureCount > 0) {
+            response.message = 'notification cannot send, please check this device token ID : ' + convertedUser.profile.deviceToken;
+            response.success = false;
+          } else if (response.successCount > 0) {
+            response.message = 'successfully send to ' + convertedUser.profile.deviceToken;
+            response.success = true;
+          }
+
+          console.log('Successfully sent message:', response);
+          return cb(null, response.message, response.success);
+        })
+        .catch(function(error) {
+          console.log('Error sending message: ', error);
+          response.message = 'error sending message : ' + error;
+          return cb(null, response.message, response.success);
+      });
+    }).catch(err => {
+      response.message = `error when trying to query user : ${err} `;
+      return cb(null, response.message, response.success);
+    })
+  }
+
+  User.remoteMethod('tryNotify', {
+    http: {
+      path: '/try-notify',
+      verb: 'post',
+    },
+    accepts: {
+      arg: 'userId',
+      type: 'string',
+    },
+    returns: [
+      {
+        arg: 'message',
+        type: 'string',
+      },
+      {
+        arg: 'success',
+        type: 'boolean',
+      },
+    ],
+    description: 'try to notify using post notification, make sure you already register the device token first (:',
+  });
 };

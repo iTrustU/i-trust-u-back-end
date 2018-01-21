@@ -56,6 +56,13 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "customLogin"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "tryNotify"
     }
   ],
   "methods": {}
