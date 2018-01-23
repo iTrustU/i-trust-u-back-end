@@ -158,7 +158,6 @@ module.exports = function(User) {
     base('Agents').select({
       filterByFormula: '{InsuranceAgentId} = ' + insuranceAgentId,
     }).eachPage(function page(records, fetchNextPage) {
-      console.log('the record : ', records);
       let recordsFromAirtable = JSON.parse(JSON.stringify(records))
 
       if (recordsFromAirtable.length == 0) {
@@ -178,6 +177,7 @@ module.exports = function(User) {
         let Role = app.models.Role;
         let RoleMapping = app.models.RoleMapping;
         let Profile = app.models.Profile;
+        let InsuranceCompany = app.models.InsuranceCompany;
 
         Role.findOne({
           where: {
@@ -202,7 +202,7 @@ module.exports = function(User) {
               if (err) {
                 console.log('Err : ', err);
                 response.message = 'error when trying to login the user';
-                return cb(null, response, {}, response.success, response.message);
+                return cb(null, {}, {}, response.success, response.message);
               }
 
               console.log('profile picture', fromInsuranceCompany.ProfilePicture[0].url)
@@ -212,19 +212,54 @@ module.exports = function(User) {
                 city: fromInsuranceCompany.City,
                 profilePicture: fromInsuranceCompany.ProfilePicture[0].url,
                 userId: res.userId,
+                agentIdAtInsuranceCompany: fromInsuranceCompany.InsuranceAgentId,
+                finalRating: 4,
               }).then((profileCreated) => {
-                User.findById(res.userId, {
-                  include: ['profile', 'roles']
-                }).then((userDetail) => {
-                  // add profile property even it empty
+                // fetch insurance company
+                base('Insurances').find(fromInsuranceCompany.InsuranceCompanyId[0], function(err, insurance) {
+                  if (err) {
+                    response.message = 'error when fetch insurance company';
+                    return cb(null, {}, {}, response.success, response.message);
+                  }
 
-                  // base('Insurances').find(fromInsuranceCompany.)
-                  let userDetailObj = JSON.parse(JSON.stringify(userDetail))
-                  userDetailObj.fromInsuranceCompany = fromInsuranceCompany;
-                  response.success = true;
-                  response.message = 'sukses mendaftar';
-                  return cb(null, userDetailObj, res.id, response.success, response.message);
+                  let convertedInsurance = JSON.parse(JSON.stringify(insurance.fields));
+                  console.log('converted user : ', convertedInsurance);
+                  // save or the insurace company
+                  InsuranceCompany.findOrCreate({
+                    where: {
+                      idFromInsuranceCompany: fromInsuranceCompany.InsuranceCompanyId[0]
+                    },
+                  }, {
+                    name: convertedInsurance.Name,
+                    phoneNumber: convertedInsurance.Phone,
+                    description: convertedInsurance.Description,
+                    website: convertedInsurance.Website,
+                    logoUrl: convertedInsurance.Logo[0].url,
+                    idFromInsuranceCompany: fromInsuranceCompany.InsuranceCompanyId[0],
+                  }, (err, newInsurance) => {
+                    if (err) {
+                      response.message = 'error when find or create insurance';
+                      
+                      return cb(null, {}, {}, response.success, response.message);
+                    }
+
+                    User.findById(res.userId, {
+                      include: ['profile', 'roles']
+                    }).then((userDetail) => {
+                      // add profile property even it empty
+    
+                      // base('Insurances').find(fromInsuranceCompany.)
+                      let userDetailObj = JSON.parse(JSON.stringify(userDetail))
+                      userDetailObj.fromInsuranceCompany = fromInsuranceCompany;
+                      response.success = true;
+                      response.message = 'sukses mendaftar';
+
+                      return cb(null, userDetailObj, res.id, response.success, response.message);
+                    });
+                  })
                 });
+
+
               }).catch(err => {
                 response.message = 'create profile failed : ' + err;
                 return cb(null, response, {}, response.success, response.message);
@@ -250,9 +285,8 @@ module.exports = function(User) {
         return;
       }
     })
-
   }
-
+    
   User.remoteMethod('register', {
     http: {
       path: '/register',

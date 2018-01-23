@@ -21,6 +21,14 @@
     "deviceToken": {
       "type": "string",
       "required": false
+    },
+    "agentIdAtInsuranceCompany": {
+      "type": "string",
+      "required": false
+    },
+    "finalRating": {
+      "type": "number",
+      "required": true
     }
   },
   "validations": [],

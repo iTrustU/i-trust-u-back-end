@@ -22,7 +22,11 @@
       "type": "string",
       "required": true
     },
-    "logoFileName": {
+    "logoUrl": {
+      "type": "string",
+      "required": true
+    },
+    "idFromInsuranceCompany": {
       "type": "string",
       "required": true
     }
