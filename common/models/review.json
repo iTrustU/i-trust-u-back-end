@@ -28,6 +28,11 @@
       "model": "ReviewRatingType",
       "foreignKey": "",
       "through": "ReviewRating"
+    },
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": ""
     }
   },
   "acls": [],
