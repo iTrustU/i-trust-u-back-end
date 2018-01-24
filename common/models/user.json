@@ -27,6 +27,11 @@
       "model": "Role",
       "foreignKey": "principalId",
       "through": "RoleMapping"
+    },
+    "insuranceCompany": {
+      "type": "belongsTo",
+      "model": "InsuranceCompany",
+      "foreignKey": ""
     }
   },
   "acls": [

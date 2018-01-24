@@ -202,24 +202,27 @@ module.exports = function(User) {
               if (err) {
                 console.log('Err : ', err);
                 response.message = 'error when trying to login the user';
-                return cb(null, {}, {}, response.success, response.message);
+                return cb(null, {}, null, response.success, response.message);
               }
 
               console.log('profile picture', fromInsuranceCompany.ProfilePicture[0].url)
               // save profile
+              let standartRating = 4;
+              let floatStandartRating = standartRating.toFixed(1);
               Profile.create({
                 name: fromInsuranceCompany.Name,
                 city: fromInsuranceCompany.City,
                 profilePicture: fromInsuranceCompany.ProfilePicture[0].url,
                 userId: res.userId,
                 agentIdAtInsuranceCompany: fromInsuranceCompany.InsuranceAgentId,
-                finalRating: 4,
+                finalRating: floatStandartRating,
+                level: fromInsuranceCompany.Level,
               }).then((profileCreated) => {
                 // fetch insurance company
                 base('Insurances').find(fromInsuranceCompany.InsuranceCompanyId[0], function(err, insurance) {
                   if (err) {
                     response.message = 'error when fetch insurance company';
-                    return cb(null, {}, {}, response.success, response.message);
+                    return cb(null, {}, null, response.success, response.message);
                   }
 
                   let convertedInsurance = JSON.parse(JSON.stringify(insurance.fields));
@@ -240,43 +243,56 @@ module.exports = function(User) {
                     if (err) {
                       response.message = 'error when find or create insurance';
                       
-                      return cb(null, {}, {}, response.success, response.message);
+                      return cb(null, {}, null, response.success, response.message);
                     }
+                    // make relationship berween user and insurance
+                    User.upsertWithWhere({
+                      email: email,
+                    }, {
+                      insuranceCompanyId: newInsurance.id,
+                    }).then((enewestUser) => {
+                      User.findById(res.userId, {
+                        include: ['profile', 'insuranceCompany'],
+                      }).then((userDetail) => {
+                        // add profile property even it empty
+      
+                        // base('Insurances').find(fromInsuranceCompany.)
+                        let userDetailObj = JSON.parse(JSON.stringify(userDetail))
+                        console.log('user detail ', userDetailObj)
+                        response.success = true;
+                        response.message = 'sukses mendaftar';
 
-                    User.findById(res.userId, {
-                      include: ['profile', 'roles']
-                    }).then((userDetail) => {
-                      // add profile property even it empty
-    
-                      // base('Insurances').find(fromInsuranceCompany.)
-                      let userDetailObj = JSON.parse(JSON.stringify(userDetail))
-                      userDetailObj.fromInsuranceCompany = fromInsuranceCompany;
-                      response.success = true;
-                      response.message = 'sukses mendaftar';
+                        return cb(null, userDetailObj, res.id, response.success, response.message);
+                      }).catch(err => {
+                        console.log('error when try to get user detail : ', err);
+                        response.message = 'error when try to get user detail - final';
+                        
+                        return cb(null, {}, null, response.success, response.message);
+                      })
+                    }).catch(err => {
+                      response.message = 'error when upsert user';
 
-                      return cb(null, userDetailObj, res.id, response.success, response.message);
+                      return cb(null, {}, null, response.success, response.message)
                     });
                   })
                 });
-
-
               }).catch(err => {
                 response.message = 'create profile failed : ' + err;
-                return cb(null, response, {}, response.success, response.message);
+                return cb(null, {}, null, response.success, response.message);
               });
             })
           }).catch(err => {
             console.log('error when trying to mapping the role :::::', err);
-            return cb(null, response, {}, response.success, response.message);
+            return cb(null, {}, null, response.success, response.message);
           })
         }).catch(err => {
           console.log('err when find user : ', err);
-          return cb(null, response, {}, response.success, response.message);
+          return cb(null, {}, null, response.success, response.message);
         })
 
       }).catch(err => {
         console.log('error buat akun : ', err);
-        return cb(null, response, {}, response.success, response.message);
+        return cb(null, {}, null, response.success, response.message);
       })
 
     }, function done(err) {

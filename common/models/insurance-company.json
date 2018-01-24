@@ -37,6 +37,11 @@
       "type": "hasMany",
       "model": "Agent",
       "foreignKey": ""
+    },
+    "users": {
+      "type": "hasMany",
+      "model": "user",
+      "foreignKey": ""
     }
   },
   "acls": [],
