@@ -240,6 +240,7 @@ module.exports = function(User) {
                 agentIdAtInsuranceCompany: fromInsuranceCompany.InsuranceAgentId,
                 finalRating: floatStandartRating,
                 level: fromInsuranceCompany.Level,
+                phone: fromInsuranceCompany.Phone,
               }).then((profileCreated) => {
                 // fetch insurance company
                 base('Insurances').find(fromInsuranceCompany.InsuranceCompanyId[0], function(err, insurance) {
