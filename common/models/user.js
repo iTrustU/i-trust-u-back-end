@@ -5,6 +5,27 @@ const algoliasearch = require('algoliasearch');
 let client = algoliasearch('4LH6EUNWWA', 'b439b75df3fbbc35b005b7958d70b0e5');
 let index = client.initIndex('iTrustU');
 
+var flattenObject = function(ob) {
+  var toReturn = {};
+
+  for (var i in ob) {
+	  if (!ob.hasOwnProperty(i)) continue;
+
+    if ((typeof ob[i]) == 'object') {
+      var flatObject = flattenObject(ob[i]);
+      for (var x in flatObject) {
+        if (!flatObject.hasOwnProperty(x)) continue;
+        
+        toReturn[i + '.' + x] = flatObject[x];
+      }
+    } else {
+      toReturn[i] = ob[i];
+    }
+  }
+  return toReturn;
+};
+
+
 module.exports = function(User) {
   var Airtable = require('airtable');
   var base = new Airtable({
@@ -174,7 +195,6 @@ module.exports = function(User) {
         email: email,
         password: password,
       }).then((user) => {
-        console.log('sukses buat akun : ', user);
 
         let app = User.app;
         let Role = app.models.Role;
@@ -495,26 +515,28 @@ module.exports = function(User) {
     ],
     description: 'try to notify using post notification, make sure you already register the device token first (:',
   });
+  // remoteh here please :D
 
-  // hooks here please :D
-  User.observe('after save', function logQuery(ctx, next) {
-    if (ctx.instance) {
-      ctx.instance.objectID = ctx.instance.id;
-      index.addObject(ctx.instance, (err, content) => {
+  User.afterRemote('register', (context, remoteMethodOutput, next) => {
+    // only run on production env, coz radundancy data`
+    if (process.env.NODE_ENV == 'production') {
+      console.log('remote method output : ', remoteMethodOutput);
+      let user = remoteMethodOutput.userDetail;
+      // clear unimportant things
+      delete user.insuranceCompany.description;
+      delete user.token;
+      delete user.success;
+      delete user.message;
+  
+      let flatedObj = flattenObject(user);
+  
+      index.addObject(flatedObj, (err, content) => {
         console.log('the content was submitted : ', content);
       });
+    } else {
+      console.log('skiped!');
     }
-    next();
-  });
 
-  User.observe('after delete', function(ctx, next){
-    console.log(`deleted`, ctx.where);
-    let objectID = ctx.where.id.toString();
-    index.deleteObject(objectID, (err) => {
-      if (!err) {
-        console.log('success delete an object on Algolia');
-      }
-    });
     next();
   });
 };
