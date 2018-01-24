@@ -1,9 +1,6 @@
 'use strict';
 let firebaseAdmin = require('../../server/firebase-admin.js');
-const algoliasearch = require('algoliasearch');
-
-let client = algoliasearch('4LH6EUNWWA', 'b439b75df3fbbc35b005b7958d70b0e5');
-let index = client.initIndex('iTrustU');
+let algolia = require('../../server/algolia-setup');
 
 var flattenObject = function(ob) {
   var toReturn = {};
@@ -518,7 +515,7 @@ module.exports = function(User) {
 
   User.afterRemote('register', (context, remoteMethodOutput, next) => {
     // only run on production env, coz radundancy data`
-    if (process.env.NODE_ENV == 'production') {
+    if (process.env.NODE_ENV == 'development') {
       console.log('remote method output : ', remoteMethodOutput);
       let user = remoteMethodOutput.userDetail;
       // clear unimportant things
@@ -527,9 +524,10 @@ module.exports = function(User) {
       delete user.success;
       delete user.message;
   
+      user.objectID = user.id;
       let flatedObj = flattenObject(user);
   
-      index.addObject(flatedObj, (err, content) => {
+      algolia.addObject(flatedObj, (err, content) => {
         console.log('the content was submitted : ', content);
       });
     } else {
