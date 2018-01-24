@@ -249,7 +249,6 @@ module.exports = function(User) {
                   }
 
                   let convertedInsurance = JSON.parse(JSON.stringify(insurance.fields));
-                  console.log('converted user : ', convertedInsurance);
                   // save or the insurace company
                   InsuranceCompany.findOrCreate({
                     where: {
@@ -401,21 +400,20 @@ module.exports = function(User) {
 
       let convertedUser = JSON.parse(JSON.stringify(user))
 
-      console.log('the user : ', convertedUser, convertedUser.profile.id);
-      let profile = new Profile();
-      profile.setId(convertedUser.profile.id);
-      console.log('the new profile instance : ', profile);
-      profile.updateAttributes({deviceToken: deviceToken}, (err, newProfile) => {
-        if (err) {
-          response.message = 'err when update token, profile id : ' + convertedUser.profile.id + ' err : ' + err;
-          return cb(null, response.message, response.success);
-        }
-
-        console.log('new profile ', newProfile);
-        response.message = 'device token changed into ' + deviceToken;
+      Profile.upsertWithWhere({
+        userId: convertedUser.id,
+      }, {
+        deviceToken: deviceToken,
+      }).then(newProfile => {
+        response.message = 'jos!';
         response.success = true;
+
         return cb(null, response.message, response.success);
-      });
+
+      }).catch(err => {
+        response.message = 'error when upsert profile : ' + err;
+        return cb(null, response.message, response.success);
+      })
     }).catch(err => {
       response.message = 'error when trying to find a user : ' + err;
       console.log('err when trying to find a user : ', err);
