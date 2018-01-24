@@ -99,7 +99,7 @@ module.exports = function(User) {
       }
 
       User.findById(res.userId, {
-        include: ['profile', 'roles']
+        include: ['profile', 'insuranceCompany'],
       }).then((userDetail) => {
         // add profile property even it empty
         let userDetailObj = JSON.parse(JSON.stringify(userDetail))
