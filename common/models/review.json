@@ -9,6 +9,10 @@
     "comment": {
       "type": "string",
       "required": true
+    },
+    "rating": {
+      "type": "string",
+      "required": "number"
     }
   },
   "validations": [],
