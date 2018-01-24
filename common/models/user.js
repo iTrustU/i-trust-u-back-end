@@ -1,6 +1,9 @@
 'use strict';
 let firebaseAdmin = require('../../server/firebase-admin.js');
-console.log('the firebase admin : ', firebaseAdmin);
+const algoliasearch = require('algoliasearch');
+
+let client = algoliasearch('4LH6EUNWWA', 'b439b75df3fbbc35b005b7958d70b0e5');
+let index = client.initIndex('iTrustU');
 
 module.exports = function(User) {
   var Airtable = require('airtable');
@@ -491,5 +494,27 @@ module.exports = function(User) {
       },
     ],
     description: 'try to notify using post notification, make sure you already register the device token first (:',
+  });
+
+  // hooks here please :D
+  User.observe('after save', function logQuery(ctx, next) {
+    if (ctx.instance) {
+      ctx.instance.objectID = ctx.instance.id;
+      index.addObject(ctx.instance, (err, content) => {
+        console.log('the content was submitted : ', content);
+      });
+    }
+    next();
+  });
+
+  User.observe('after delete', function(ctx, next){
+    console.log(`deleted`, ctx.where);
+    let objectID = ctx.where.id.toString();
+    index.deleteObject(objectID, (err) => {
+      if (!err) {
+        console.log('success delete an object on Algolia');
+      }
+    });
+    next();
   });
 };
