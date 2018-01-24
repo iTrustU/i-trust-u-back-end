@@ -1,6 +1,7 @@
 'use strict';
 let firebaseAdmin = require('../../server/firebase-admin.js');
 let algolia = require('../../server/algolia-setup');
+let airtableBase = require('../../server/airtable-setup');
 
 var flattenObject = function(ob) {
   var toReturn = {};
@@ -24,10 +25,6 @@ var flattenObject = function(ob) {
 
 
 module.exports = function(User) {
-  var Airtable = require('airtable');
-  var base = new Airtable({
-    apiKey: process.env.AIRTABLE_API_KEY,
-  }).base(process.env.AIRTABLE_BASE);
 
   // Remove existing validations for email
   delete User.validations.email;
@@ -176,7 +173,7 @@ module.exports = function(User) {
       message: 'something when wrong',
     };
     // check is there's at Insurace company database
-    base('Agents').select({
+    airtableBase('Agents').select({
       filterByFormula: '{InsuranceAgentId} = ' + insuranceAgentId,
     }).eachPage(function page(records, fetchNextPage) {
       let recordsFromAirtable = JSON.parse(JSON.stringify(records))
@@ -240,7 +237,7 @@ module.exports = function(User) {
                 phone: fromInsuranceCompany.Phone,
               }).then((profileCreated) => {
                 // fetch insurance company
-                base('Insurances').find(fromInsuranceCompany.InsuranceCompanyId[0], function(err, insurance) {
+                airtableBase('Insurances').find(fromInsuranceCompany.InsuranceCompanyId[0], function(err, insurance) {
                   if (err) {
                     response.message = 'error when fetch insurance company';
                     return cb(null, {}, null, response.success, response.message);
@@ -276,7 +273,7 @@ module.exports = function(User) {
                       }).then((userDetail) => {
                         // add profile property even it empty
       
-                        // base('Insurances').find(fromInsuranceCompany.)
+                        // airtableBase('Insurances').find(fromInsuranceCompany.)
                         let userDetailObj = JSON.parse(JSON.stringify(userDetail))
                         console.log('user detail ', userDetailObj)
                         response.success = true;
@@ -515,7 +512,7 @@ module.exports = function(User) {
 
   User.afterRemote('register', (context, remoteMethodOutput, next) => {
     // only run on production env, coz radundancy data`
-    if (process.env.NODE_ENV == 'development') {
+    if (process.env.NODE_ENV == 'production') {
       console.log('remote method output : ', remoteMethodOutput);
       let user = remoteMethodOutput.userDetail;
       // clear unimportant things

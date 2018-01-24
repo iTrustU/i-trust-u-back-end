@@ -1,4 +1,5 @@
 'use strict';
+let airtableBase = require('../../server/airtable-setup');
 
 module.exports = function(Review) {
   Review.remoteMethod('checkCustomerPhoneNumber', {
@@ -45,10 +46,23 @@ module.exports = function(Review) {
         response.message = `user with ID ${userAgentId} are not found`;
         return cb(null, response.success, response.message);
       }
+      let userObj = JSON.parse(JSON.stringify(userDetail));
 
       // check if phone is the same with data in airtable
-
-
+      airtableBase('Customers').select({
+        filterByFormula: '{Phone} = ' + phone,
+      }).eachPage(function page(records, fetchNextPage){
+        let recordsFromAirtable = JSON.parse(JSON.stringify(records));
+        
+        if (recordsFromAirtable.length == 0) {
+          response.message = `nomor telefon ${phone} tidak terdaftar sebagai nasabah dari agen ${userObj.profile.name}`;
+          return cb(null, response.success, response.message);
+        } else {
+          response.success = true;
+          response.message = `benar ${phone} adalah nasabah ${userObj.profile.name}`;
+          return cb(null, response.success, response.message);
+        }
+      });
     }).catch(err => {
       console.log('error : ', err);
       response.message = 'error when find user by id';
