@@ -1,4 +1,5 @@
 'use strict';
+let axios = require('axios');
 let airtableBase = require('../../server/airtable-setup');
 
 module.exports = function(Review) {
@@ -69,4 +70,15 @@ module.exports = function(Review) {
       return cb(null, response.success, response.message);
     })
   }
+
+  Review.afterRemote('checkCustomerPhoneNumber', (context, remoteMethodOutput, next) => {
+    let messageContent = `Hai, kamu baru saja melakukan review, jika tidak merasa melakukan, klik disini untuk menyunting`;
+    axios.get(`https://reguler.zenziva.net/apps/smsapi.php?userkey=047sfc&passkey=${remoteMethodOutput.phone}&nohp=${remoteMethodOutput.comment}&pesan=${messageContent}`)
+    .then((response) => {
+      console.log(response);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  })
 };
