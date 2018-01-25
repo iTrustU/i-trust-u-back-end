@@ -1,6 +1,7 @@
 'use strict';
 let axios = require('axios');
 let airtableBase = require('../../server/airtable-setup');
+let firebaseAdmin = require('../../server/firebase-admin.js');
 
 module.exports = function(Review) {
   Review.remoteMethod('checkCustomerPhoneNumber', {
@@ -71,14 +72,56 @@ module.exports = function(Review) {
     })
   }
 
-  Review.afterRemote('checkCustomerPhoneNumber', (context, remoteMethodOutput, next) => {
-    let messageContent = `Hai, kamu baru saja melakukan review, jika tidak merasa melakukan, klik disini untuk menyunting`;
-    axios.get(`https://reguler.zenziva.net/apps/smsapi.php?userkey=047sfc&passkey=${remoteMethodOutput.phone}&nohp=${remoteMethodOutput.comment}&pesan=${messageContent}`)
-    .then((response) => {
-      console.log(response);
+  Review.afterRemote('*', (context, remoteMethodOutput, next) => {
+    console.log('hooked');
+    let app = Review.app;
+    let User = app.models.user;
+
+    User.findById(remoteMethodOutput.userId, {
+      include: ['profile'],
+    }).then(userDetail => {
+      let userObj = JSON.parse(JSON.stringify(userDetail));
+      let messageContent = `Hai, kamu baru saja me-review ${userObj.profile.name}, jika tidak merasa melakukan, klik disini untuk menyunting`;
+      
+      axios.get(`https://reguler.zenziva.net/apps/smsapi.php?userkey=047sfc&passkey=iTrustU&nohp=${userObj.profile.phone}&pesan=${messageContent}`)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+      // push notification
+      var payload = {
+        notification: {
+          title: `Halo ${userObj.profile.name}, Kamu baru dapat review lho!`,
+          body: `Selamat ${userObj.profile.name} ada review bagus untuk mu di iTrustU!, cek segera`,
+        },
+        data: {
+          userId: userObj.id,
+        },
+      };
+
+      var options = {
+        priority: 'high',
+        timeToLive: 60 * 60 * 24,
+      };
+
+      // registration token with the provided options.
+      firebaseAdmin.messaging().sendToDevice([userObj.profile.deviceToken], payload, options)
+        .then(function(response) {
+          if (response.failureCount > 0) {
+            console.log('notification cannot send, please check this device token ID : ' + userObj.profile.deviceToken);
+
+          } else if (response.successCount > 0) {
+            console.log('successfully send to ' + userObj.profile.deviceToken);
+          }
+
+          console.log('Successfully sent message:', response);
+        })
+        .catch(function(error) {
+          console.log('Error sending message: ', error);
+      });
     })
-    .catch((error) => {
-      console.log(error);
-    });
+    next();
   })
 };

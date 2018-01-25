@@ -12,7 +12,7 @@ module.exports = function(server) {
 
   User.findOne({
     where: {
-      email: users[0].email
+      email: 'imposible@tobethesame.com',
     }
   }).then(user => {
     if (!user) {
