@@ -76,13 +76,37 @@ module.exports = function(Review) {
     console.log('hooked');
     let app = Review.app;
     let User = app.models.user;
+    let Profile = app.models.profile;
 
     User.findById(remoteMethodOutput.userId, {
       include: ['profile'],
     }).then(userDetail => {
       let userObj = JSON.parse(JSON.stringify(userDetail));
       let messageContent = `Hai, kamu baru saja me-review ${userObj.profile.name}, jika tidak merasa melakukan, klik disini untuk menyunting`;
+      // calculate
+      Review.find({
+        where: {
+          userId: userObj.id,
+        },
+      }).then(reviews => {
+        // skip calculation when it first come 
+        let reviewsObj = JSON.parse(JSON.stringify(reviews));
+        let reviewsLength = reviewsObj.length;
+        if (reviewsLength > 1) {
+          let currentRating = userObj.profile.finalRating;
+          let finalRating = ((currentRating * reviewsLength - 1) + remoteMethodOutput.rating) / reviewsLength;
+          
+          Profile.upsertWithWhere({
+            userId: userObj.id,
+          }, {
+            finalRating: finalRating,
+          })
+        }
+      }).catch(err => {
+        console.log('error when calculate : ', err);
+      })
       
+      // save
       axios.get(`https://reguler.zenziva.net/apps/smsapi.php?userkey=047sfc&passkey=iTrustU&nohp=${userObj.profile.phone}&pesan=${messageContent}`)
       .then((response) => {
         console.log(response);

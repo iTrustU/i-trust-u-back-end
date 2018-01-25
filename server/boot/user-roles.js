@@ -16,32 +16,32 @@ module.exports = function(server) {
     }
   }).then(user => {
     if (!user) {
-      User.create(users, function(err, users) {
-          if (err) {return console.log(err);}
+      // User.create(users, function(err, users) {
+      //     if (err) {return console.log(err);}
 
-          let roles = [{
-            name: 'admin',
-            description: 'Can doing anything'
-          },
-          {
-            name: 'agent',
-            description: 'as agent insurence'
-          }]
+      //     let roles = [{
+      //       name: 'admin',
+      //       description: 'Can doing anything'
+      //     },
+      //     {
+      //       name: 'agent',
+      //       description: 'as agent insurence'
+      //     }]
 
-          //create the admin role
-          Role.create(roles, function(err, roles) {
-            if (err) {console.log(err);}
+      //     //create the admin role
+      //     Role.create(roles, function(err, roles) {
+      //       if (err) {console.log(err);}
 
-            roles.map((role, index) => {
-              role.principals.create({
-                principalType: RoleMapping.USER,
-                principalId: users[index].id
-              }).then(() => {
-                console.log('sukses set ', users[index].email, ' as ', role.name);
-              })
-            })
-          });
-        });
+      //       roles.map((role, index) => {
+      //         role.principals.create({
+      //           principalType: RoleMapping.USER,
+      //           principalId: users[index].id
+      //         }).then(() => {
+      //           console.log('sukses set ', users[index].email, ' as ', role.name);
+      //         })
+      //       })
+      //     });
+      //   });
     }
   })
 

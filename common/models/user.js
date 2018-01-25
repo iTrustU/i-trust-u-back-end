@@ -527,6 +527,8 @@ module.exports = function(User) {
       algolia.addObject(flatedObj, (err, content) => {
         console.log('the content was submitted : ', content);
       });
+
+
     } else {
       console.log('skiped!');
     }
