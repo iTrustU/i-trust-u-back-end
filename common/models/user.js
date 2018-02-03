@@ -235,6 +235,10 @@ module.exports = function(User) {
                 finalRating: floatStandartRating,
                 level: fromInsuranceCompany.Level,
                 phone: fromInsuranceCompany.Phone,
+                location: {
+                  lng: fromInsuranceCompany.Longitude,
+                  lat: fromInsuranceCompany.Latitude,
+                },
               }).then((profileCreated) => {
                 // fetch insurance company
                 airtableBase('Insurances').find(fromInsuranceCompany.InsuranceCompanyId[0], function(err, insurance) {
@@ -309,6 +313,7 @@ module.exports = function(User) {
 
       }).catch(err => {
         console.log('error buat akun : ', err);
+        response.message = 'error saat buat akun';
         return cb(null, {}, null, response.success, response.message);
       })
 
@@ -512,9 +517,10 @@ module.exports = function(User) {
 
   User.afterRemote('register', (context, remoteMethodOutput, next) => {
     // only run on production env, coz radundancy data`
+    let user = remoteMethodOutput.userDetail;
+
     if (process.env.NODE_ENV == 'production') {
       console.log('remote method output : ', remoteMethodOutput);
-      let user = remoteMethodOutput.userDetail;
       // clear unimportant things
       delete user.insuranceCompany.description;
       delete user.token;
@@ -527,11 +533,23 @@ module.exports = function(User) {
       algolia.addObject(flatedObj, (err, content) => {
         console.log('the content was submitted : ', content);
       });
-
-
     } else {
-      console.log('skiped!');
+      console.log('skiped! because not production env.');
     }
+    // save initial review
+    let app = User.app;
+    let Review = app.models.Review;
+
+    let initialRating = 4;
+    Review.create({
+      userId: user.id,
+      comment: 'Agen yang handal dan terpercaya',
+      rating: initialRating.toFixed(1),
+    }).then(review => {
+      console.log('created review : ', review)
+    }).catch(err => {
+      console.log('error when create initial review : ', err);
+    });
 
     next();
   });
