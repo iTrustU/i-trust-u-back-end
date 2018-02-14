@@ -37,12 +37,10 @@ module.exports = function(Review) {
     let User = app.models.user;
 
     let response = {
-      message: 'tetap tenang dan tetap semangat',
-      success: false,
-    }
+      message: 'tetap tenang dan tetap semangat dan tetep bersyukur ini semua hanya titipan sang ilahi',
+      success: false, 
+    };
       
-
-
     User.findById(userAgentId, {
       include: ['profile'],
     }).then(userDetail => {

@@ -405,7 +405,7 @@ module.exports = function(User) {
       }, {
         deviceToken: deviceToken,
       }).then(newProfile => {
-        response.message = 'jos!';
+        response.message = 'jos gandos!';
         response.success = true;
 
         return cb(null, response.message, response.success);
@@ -413,13 +413,13 @@ module.exports = function(User) {
       }).catch(err => {
         response.message = 'error when upsert profile : ' + err;
         return cb(null, response.message, response.success);
-      })
+      });
     }).catch(err => {
       response.message = 'error when trying to find a user : ' + err;
       console.log('err when trying to find a user : ', err);
       return cb(null, response.message, response.success);
     });
-  }
+  };
 
   User.remoteMethod('updateDeviceToken', {
     http: {
@@ -466,7 +466,7 @@ module.exports = function(User) {
         priority: 'high',
         timeToLive: 60 * 60 * 24,
       };
-        // Send a message to the device corresponding to the provided
+      // Send a message to the device corresponding to the provided
       // registration token with the provided options.
       firebaseAdmin.messaging().sendToDevice([convertedUser.profile.deviceToken], payload, options)
         .then(function(response) {
@@ -489,8 +489,8 @@ module.exports = function(User) {
     }).catch(err => {
       response.message = `error when trying to query user : ${err} `;
       return cb(null, response.message, response.success);
-    })
-  }
+    });
+  };
 
   User.remoteMethod('tryNotify', {
     http: {
@@ -526,10 +526,10 @@ module.exports = function(User) {
       delete user.token;
       delete user.success;
       delete user.message;
-  
+
       user.objectID = user.id;
       let flatedObj = flattenObject(user);
-  
+
       algolia.addObject(flatedObj, (err, content) => {
         console.log('the content was submitted : ', content);
       });
@@ -546,7 +546,7 @@ module.exports = function(User) {
       comment: 'Agen yang handal dan terpercaya',
       rating: initialRating.toFixed(1),
     }).then(review => {
-      console.log('created review : ', review)
+      console.log('created review : ', review);
     }).catch(err => {
       console.log('error when create initial review : ', err);
     });

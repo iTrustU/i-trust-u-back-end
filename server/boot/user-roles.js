@@ -10,40 +10,27 @@ module.exports = function(server) {
     {email: 'ego@i-trust-u.com', password: 'secret'}
   ];
 
-  User.findOne({
+  let roles = [{
+    name: 'admin',
+    description: 'Can doing anything'
+  },
+  {
+    name: 'agent',
+    description: 'as agent insurence'
+  }]
+
+  Role.findOne({
     where: {
-      email: 'imposible@tobethesame.com',
+      admin: 'admin',
+    },
+  }).then(role => {
+    if (!role) {
+      //create the admin role
+      Role.create(roles, function(err, roles) {
+        if (err) {console.log(err);}
+      });
     }
-  }).then(user => {
-    if (!user) {
-      // User.create(users, function(err, users) {
-      //     if (err) {return console.log(err);}
-
-      //     let roles = [{
-      //       name: 'admin',
-      //       description: 'Can doing anything'
-      //     },
-      //     {
-      //       name: 'agent',
-      //       description: 'as agent insurence'
-      //     }]
-
-      //     //create the admin role
-      //     Role.create(roles, function(err, roles) {
-      //       if (err) {console.log(err);}
-
-      //       roles.map((role, index) => {
-      //         role.principals.create({
-      //           principalType: RoleMapping.USER,
-      //           principalId: users[index].id
-      //         }).then(() => {
-      //           console.log('sukses set ', users[index].email, ' as ', role.name);
-      //         })
-      //       })
-      //     });
-      //   });
-    }
-  })
+  });
 
   RoleMapping.belongsTo(User);
   User.hasMany(RoleMapping, {foreignKey: 'principalId'});
