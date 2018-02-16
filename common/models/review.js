@@ -73,17 +73,21 @@ module.exports = function(Review) {
     })
   }
 
-  Review.afterRemote('*', (context, remoteMethodOutput, next) => {
-    console.log('hooked');
+  function checkPhoneNumberOnAirTable(phoneNumber) {
+
+  }
+  Review.afterRemote('create', (context, remoteMethodOutput, next) => {
+    console.log('hooked', remoteMethodOutput);
+    console.log('hooked remoted raing', remoteMethodOutput.rating);
     let app = Review.app;
     let User = app.models.user;
-    let Profile = app.models.profile;
+    let Profile = app.models.Profile;
 
     User.findById(remoteMethodOutput.userId, {
       include: ['profile'],
     }).then(userDetail => {
       let userObj = JSON.parse(JSON.stringify(userDetail));
-      let messageContent = `Hai, kamu baru saja me-review ${userObj.profile.name}, jika tidak merasa melakukan, klik disini untuk menyunting`;
+      let messageContent = `Hai, kamu baru saja me-review ${userObj.profile.name}, jika tidak merasa melakukan, klik tautan bertikut untuk menyunting`;
       // calculate
       Review.find({
         where: {
@@ -95,12 +99,16 @@ module.exports = function(Review) {
         let reviewsLength = reviewsObj.length;
         if (reviewsLength > 1) {
           let currentRating = userObj.profile.finalRating;
-          let finalRating = ((currentRating * reviewsLength - 1) + remoteMethodOutput.rating) / reviewsLength;
+          let finalRating = (currentRating + remoteMethodOutput.rating) / reviewsLength;
           
           Profile.upsertWithWhere({
             userId: userObj.id,
           }, {
             finalRating: finalRating,
+          }).then(newProfile => {
+            console.log('the updated profile : ', newProfile)
+          }).catch(err => {
+            console.log('error when update profile')
           })
         }
       }).catch(err => {
@@ -108,9 +116,9 @@ module.exports = function(Review) {
       })
       
       // save
-      axios.get(`https://reguler.zenziva.net/apps/smsapi.php?userkey=${process.env.ZENZIVA_USER_KEY}&passkey=${process.env.ZENZIVA_PASS_KEY}&nohp=${userObj.profile.phone}&pesan=${messageContent}`)
+      axios.get(`https://reguler.zenziva.net/apps/smsapi.php?userkey=${process.env.ZENZIVA_USER_KEY}&passkey=${process.env.ZENZIVA_PASS_KEY}&nohp=${remoteMethodOutput.phone}&pesan=${messageContent}`)
       .then((response) => { 
-        console.log(response);
+        console.log(response.config);
       })
       .catch((error) => {
         console.log(error);

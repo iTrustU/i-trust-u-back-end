@@ -12,7 +12,11 @@
     },
     "rating": {
       "type": "number",
-      "required": "true"
+      "required": true
+    },
+    "phone": {
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],
