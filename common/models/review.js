@@ -131,6 +131,7 @@ module.exports = function(Review) {
         },
         data: {
           userId: userObj.id,
+          url: process.env.WEB_HOST + '/profile/' + userObj.id,
         },
       };
 
