@@ -1,7 +1,17 @@
 'use strict';
+let qrCode = require('qrcode');
 let firebaseAdmin = require('../../server/firebase-admin.js');
 let algolia = require('../../server/algolia-setup');
 let airtableBase = require('../../server/airtable-setup');
+let QRCode = require('qrcode');
+let cloudinary = require('cloudinary');
+
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 
 var flattenObject = function(ob) {
   var toReturn = {};
@@ -539,6 +549,7 @@ module.exports = function(User) {
     // save initial review
     let app = User.app;
     let Review = app.models.Review;
+    let Profile = app.models.Profile;
 
     let initialRating = 4;
     Review.create({
@@ -550,6 +561,32 @@ module.exports = function(User) {
     }).catch(err => {
       console.log('error when create initial review : ', err);
     });
+
+    // generate QR code
+
+    console.log(' process.env.PWD : ', process.env.PWD)
+    let fileLocation = '/assets/images/qr/';
+    let fileName = `qr-${user.id}.png`;
+    let fullQRImagePath = process.env.PROJECT_PATH + fileLocation + fileName;
+    let qrContent = `${process.env.WEB_HOST}/profile/${user.id}`;
+
+    QRCode.toFile(fullQRImagePath, qrContent, {}, function(err, url) {
+      cloudinary.uploader.upload(fullQRImagePath, function(result) { 
+        console.log(result) 
+        Profile.upsertWithWhere({
+          userId: user.id,
+        }, {
+          qrImageUrl: result.secure_url,
+        }).then(profile => {
+          console.log('profile update with qr image : ', profile)
+        }).catch(err => {
+          console.log('error when update profile : ', err)
+        })
+      });
+      console.log('error : ', err)
+      console.log('file : ', url);
+    
+    })
 
     next();
   });

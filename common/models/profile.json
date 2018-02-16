@@ -41,7 +41,11 @@
     "location": {
       "type": "GeoPoint",
       "required": true
-    } 
+    },
+    "qrImageUrl": {
+      "type": "string",
+      "required": false
+    }
   },
   "validations": [],
   "relations": {
