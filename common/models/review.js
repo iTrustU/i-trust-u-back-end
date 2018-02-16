@@ -58,14 +58,14 @@ module.exports = function(Review) {
         
         if (recordsFromAirtable.length == 0) {
               // save
-          let messageContent = `Hai, kamu baru saja me-review ${userObj.profile.name}, jika tidak merasa melakukan, klik disini untuk menyunting`;
-          axios.get(`https://reguler.zenziva.net/apps/smsapi.php?userkey=${process.env.ZENZIVA_USER_KEY}&passkey=${process.env.ZENZIVA_PASS_KEY}&nohp=${userObj.profile.phone}&pesan=${messageContent}`)
-          .then((response) => {
-            console.log(response);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+          // let messageContent = `Hai, kamu baru saja me-review ${userObj.profile.name}, jika tidak merasa melakukan, klik disini untuk menyunting`;
+          // axios.get(`https://reguler.zenziva.net/apps/smsapi.php?userkey=${process.env.ZENZIVA_USER_KEY}&passkey=${process.env.ZENZIVA_PASS_KEY}&nohp=${userObj.profile.phone}&pesan=${messageContent}`)
+          // .then((response) => {
+          //   console.log(response);
+          // })
+          // .catch((error) => {
+          //   console.log(error);
+          // });
 
           response.message = `nomor telefon ${phone} tidak terdaftar sebagai nasabah dari agen ${userObj.profile.name}`;
           return cb(null, response.success, response.message);

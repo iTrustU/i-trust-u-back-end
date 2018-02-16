@@ -54,23 +54,7 @@
       }
     }
   },
-  "Agent": {
-    "dataSource": "mongoDB",
-    "public": true
-  },
-  "Client": {
-    "dataSource": "mongoDB",
-    "public": true
-  },
   "Review": {
-    "dataSource": "mongoDB",
-    "public": true
-  },
-  "ReviewRating": {
-    "dataSource": "mongoDB",
-    "public": true
-  },
-  "ReviewRatingType": {
     "dataSource": "mongoDB",
     "public": true
   },

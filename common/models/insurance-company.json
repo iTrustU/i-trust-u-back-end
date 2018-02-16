@@ -33,11 +33,6 @@
   },
   "validations": [],
   "relations": {
-    "agents": {
-      "type": "hasMany",
-      "model": "Agent",
-      "foreignKey": ""
-    },
     "users": {
       "type": "hasMany",
       "model": "user",

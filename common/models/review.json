@@ -11,28 +11,12 @@
       "required": true
     },
     "rating": {
-      "type": "string",
-      "required": "number"
+      "type": "number",
+      "required": "true"
     }
   },
   "validations": [],
   "relations": {
-    "client": {
-      "type": "belongsTo",
-      "model": "Client",
-      "foreignKey": ""
-    },
-    "agent": {
-      "type": "belongsTo",
-      "model": "Agent",
-      "foreignKey": ""
-    },
-    "reviewRatingTypes": {
-      "type": "hasMany",
-      "model": "ReviewRatingType",
-      "foreignKey": "",
-      "through": "ReviewRating"
-    },
     "user": {
       "type": "belongsTo",
       "model": "user",

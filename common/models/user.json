@@ -12,11 +12,6 @@
   "properties": {},
   "validations": [],
   "relations": {
-    "agent": {
-      "type": "hasOne",
-      "model": "Agent",
-      "foreignKey": ""
-    },
     "profile": {
       "type": "hasOne",
       "model": "Profile",
