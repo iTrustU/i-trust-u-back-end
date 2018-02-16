@@ -88,7 +88,7 @@ module.exports = function(Review) {
       include: ['profile'],
     }).then(userDetail => {
       let userObj = JSON.parse(JSON.stringify(userDetail));
-      let messageContent = `Hai, kamu baru saja me-review ${userObj.profile.name}, jika tidak merasa melakukan, klik tautan bertikut untuk menyunting`;
+      let messageContent = `Hai, kamu baru saja me-review ${userObj.profile.name}, jika tidak merasa melakukan, klik tautan bertikut untuk menyunting ${process.env.WEB_HOST}/profile/${userObj.id}`;
       // calculate
       Review.find({
         where: {
