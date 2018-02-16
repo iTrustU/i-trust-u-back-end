@@ -2,6 +2,7 @@
 let axios = require('axios');
 let _ = require('lodash');
 let airtableBase = require('../../server/airtable-setup');
+let algolia = require('../../server/algolia-setup');
 let firebaseAdmin = require('../../server/firebase-admin.js');
 
 module.exports = function(Review) {
@@ -111,6 +112,15 @@ module.exports = function(Review) {
           }).catch(err => {
             console.log('error when update profile')
           })
+ 
+          let algoliaObj = {
+            objectID: userObj.id,
+          };
+
+          algoliaObj['profile.finalRating'] = finalRating;
+          algolia.saveObject(algoliaObj, (err, content) => {
+            console.log('the content after updated : ', content);
+          });
         }
       }).catch(err => {
         console.log('error when calculate : ', err);
