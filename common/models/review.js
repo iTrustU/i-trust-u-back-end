@@ -1,5 +1,6 @@
 'use strict';
 let axios = require('axios');
+let _ = require('lodash');
 let airtableBase = require('../../server/airtable-setup');
 let firebaseAdmin = require('../../server/firebase-admin.js');
 
@@ -98,8 +99,8 @@ module.exports = function(Review) {
         let reviewsObj = JSON.parse(JSON.stringify(reviews));
         let reviewsLength = reviewsObj.length;
         if (reviewsLength > 1) {
-          let currentRating = userObj.profile.finalRating;
-          let finalRating = (currentRating + remoteMethodOutput.rating) / reviewsLength;
+          let sumRating = _.sumBy(reviewsObj, 'rating');
+          let finalRating = sumRating / reviewsLength;
           
           Profile.upsertWithWhere({
             userId: userObj.id,
