@@ -14,6 +14,7 @@
     "airtable": "^0.5.2",
     "algoliasearch": "^3.24.9",
     "axios": "^0.17.1",
+    "blob-stream": "^0.1.3",
     "bluebird": "^3.5.0",
     "cloudinary": "^1.10.0",
     "compression": "^1.0.3",
