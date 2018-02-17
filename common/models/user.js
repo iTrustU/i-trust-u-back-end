@@ -2,16 +2,9 @@
 let qrCode = require('qrcode');
 let firebaseAdmin = require('../../server/firebase-admin.js');
 let algolia = require('../../server/algolia-setup');
+let cloudinary = require('../../server/cloudinary-setup');
 let airtableBase = require('../../server/airtable-setup');
 let QRCode = require('qrcode');
-let cloudinary = require('cloudinary');
-
-cloudinary.config({ 
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
 
 var flattenObject = function(ob) {
   var toReturn = {};
