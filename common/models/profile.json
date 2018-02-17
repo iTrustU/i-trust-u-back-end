@@ -45,6 +45,10 @@
     "qrImageUrl": {
       "type": "string",
       "required": false
+    },
+    "businessCardLink": {
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],
