@@ -13,9 +13,11 @@ doc.registerFont('OpenSans', './assets/fonts/Open_Sans/OpenSans-Regular.ttf')
 doc.registerFont('OpenSansLight', './assets/fonts/Open_Sans/OpenSans-Light.ttf')
 
 doc.pipe(fs.createWriteStream('output.pdf'));
+doc.image('./assets/templates/business-card-template.png', 0, 0, {width: 215});
 // draw some text
 doc.font('OpenSans')
    .fontSize(14)
+   .fillColor('white')
    .text('Diky Arga Anggara', 20, 20);
 doc.font('OpenSansLight')
    .fontSize(9)
@@ -30,10 +32,10 @@ doc.font('OpenSans')
   .fontSize(7)
   .text('Alamat : Nusa Dua - Bali', 20, 125); 
  doc.font('OpenSans')
-   .fontSize(5)
-   .text('Temukan profil dan ulasan seputar saya di iTrustU', 130, 75, {width: 70, align: 'center'}); 
-doc.image('./assets/images/logos/aaji-logo.jpg', 150, 20, {width: 40});
-doc.image('./assets/images/qr/qr-5a871f590be80fce2655dc18.png', 140, 90, {width: 50});
+   .fontSize(4)
+   .fillColor('black')
+   .text('Temukan profil dan ulasan seputar saya di iTrustU', 158, 75, {width: 50, align: 'center'}); 
+doc.image('./assets/images/qr/qr-5a871f590be80fce2655dc18.png', 163, 95, {width: 40});
 
 
 doc.end();
