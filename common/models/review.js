@@ -139,6 +139,7 @@ module.exports = function(Review) {
         notification: {
           title: `Halo ${userObj.profile.name}, Kamu baru dapat review lho!`,
           body: `Selamat ${userObj.profile.name} ada review bagus untuk mu di iTrustU!, cek segera`,
+          click_action: process.env.WEB_HOST + '/profile/' + userObj.id,
         },
         data: {
           userId: userObj.id,
