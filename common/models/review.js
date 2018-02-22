@@ -5,6 +5,26 @@ let airtableBase = require('../../server/airtable-setup');
 let algolia = require('../../server/algolia-setup');
 let firebaseAdmin = require('../../server/firebase-admin.js');
 
+var flattenObject = function(ob) {
+  var toReturn = {};
+
+  for (var i in ob) {
+	  if (!ob.hasOwnProperty(i)) continue;
+
+    if ((typeof ob[i]) == 'object') {
+      var flatObject = flattenObject(ob[i]);
+      for (var x in flatObject) {
+        if (!flatObject.hasOwnProperty(x)) continue;
+        
+        toReturn[i + '.' + x] = flatObject[x];
+      }
+    } else {
+      toReturn[i] = ob[i];
+    }
+  }
+  return toReturn;
+};
+
 module.exports = function(Review) {
   Review.remoteMethod('checkCustomerPhoneNumber', {
     http: {
@@ -86,7 +106,7 @@ module.exports = function(Review) {
     let Profile = app.models.Profile;
 
     User.findById(remoteMethodOutput.userId, {
-      include: ['profile'],
+      include: ['profile', 'insuranceCompany'],
     }).then(userDetail => {
       let userObj = JSON.parse(JSON.stringify(userDetail));
       let messageContent = `Hai, kamu baru saja me-review ${userObj.profile.name}, jika tidak merasa melakukan, klik tautan bertikut untuk menyunting ${process.env.WEB_HOST}/profile/${userObj.id}`;
@@ -109,18 +129,21 @@ module.exports = function(Review) {
             finalRating: finalRating,
           }).then(newProfile => {
             console.log('the updated profile : ', newProfile)
+ 
+            delete userObj.insuranceCompany.description;
+  
+            let algoliaObj = flattenObject(userObj);
+            algoliaObj.objectID = userObj.id;
+            algoliaObj['profile.finalRating'] = finalRating;
+            console.log('-----> final algolia Obj ', algoliaObj)
+            algolia.saveObject(algoliaObj, (err, content) => {
+              console.log('the content after updated : ', content);
+            });
           }).catch(err => {
             console.log('error when update profile')
           })
- 
-          let algoliaObj = {
-            objectID: userObj.id,
-          };
 
-          algoliaObj['profile.finalRating'] = finalRating;
-          algolia.saveObject(algoliaObj, (err, content) => {
-            console.log('the content after updated : ', content);
-          });
+
         }
       }).catch(err => {
         console.log('error when calculate : ', err);
